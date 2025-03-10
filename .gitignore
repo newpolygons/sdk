@@ -5,6 +5,8 @@
 *.elf
 *.exe
 *.sprx
+*.DS_Store
+env/
 nid_db.xml
 aerolib.csv
 .gdb_history

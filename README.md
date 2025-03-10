@@ -1,62 +1,6 @@
-# ps5-payload-sdk
-This is an SDK for developing payloads targeted at exploited PS5s running an ELF
-loader, e.g., [ps5-payload-elfldr][elfldr], the [BD-J ps5-payload-loader][bdj],
-or the [webkit approached from Specter][webkit]. Several artifacts in this
-repository originate from the [PS5SDK][PS5SDK] project.
+# ps5 payload sdk
 
-## Prerequisites
-On Debian-flavored operating systems, you can invoke the following command to
-install dependencies used by the SDK.
-```console
-john@localhost:ps5-payload-dev/sdk$ sudo apt-get update && sudo apt-get upgrade # optional
-john@localhost:ps5-payload-dev/sdk$ sudo apt-get install bash clang-15 lld-15 # required
-john@localhost:ps5-payload-dev/sdk$ sudo apt-get install socat cmake meson pkg-config # optional
-```
-
-If you are using Fedora, you can install dependencies as follows (tested with version 41):
-```console
-john@localhost:ps5-payload-dev/sdk$ sudo dnf install bash llvm-devel clang lld # required
-john@localhost:ps5-payload-dev/sdk$ sudo dnf install socat cmake meson pkg-config # optional
-```
-
-## Quick-start
-To download and install a binary distribution for GNU/Linux:
-```console
-john@localhost:tmp$ wget https://github.com/ps5-payload-dev/sdk/releases/latest/download/ps5-payload-sdk.zip
-john@localhost:tmp$ sudo unzip -d /opt ps5-payload-sdk.zip
-```
-
-## Building
-```console
-john@localhost:ps5-payload-dev/sdk$ make
-john@localhost:ps5-payload-dev/sdk$ make DESTDIR=/opt/ps5-payload-sdk install
-john@localhost:ps5-payload-dev/sdk$ export PS5_PAYLOAD_SDK=/opt/ps5-payload-sdk
-john@localhost:ps5-payload-dev/sdk$ ./libcxx.sh # fetch, build, and install libcxx
-```
-
-## Usage
-```console
-john@localhost:ps5-payload-dev/sdk$ export PS5_PAYLOAD_SDK=/opt/ps5-payload-sdk
-john@localhost:ps5-payload-dev/sdk$ make -C samples/hello_world
-john@localhost:ps5-payload-dev/sdk$ export PS5_HOST=ps5; export PS5_PORT=9021
-john@localhost:ps5-payload-dev/sdk$ make -C samples/hello_world test
-```
-
-## Adding new SCE Libs
-If you have decrypted sprx files that you would like to interact with, you can
-build stubs for them as follows:
-```console
-john@localhost:ps5-payload-dev/sdk$ sudo apt-get install wget python3 python3-pyelftools
-john@localhost:ps5-payload-dev/sdk$ ln -s /path/to/sprx/libSceXYZ.sprx sce_stubs/libSceXYZ.sprx
-john@localhost:ps5-payload-dev/sdk$ make -C sce_stubs stubs
-john@localhost:ps5-payload-dev/sdk$ make DESTDIR=/opt/ps5-payload-sdk install
-```
-
-## Reporting Bugs
-If you encounter problems with the SDK, please [file a github issue][issues].
-If you plan on sending pull requests which affect more than a few lines of code,
-please file an issue before you start to work on you changes. This will allow us
-to discuss the solution properly before you commit time and effort.
+You are probably looking for https://github.com/ps5-payload-dev/sdk
 
 ## License
 Files in the include_bsd directory are licenced under BSD licences.
