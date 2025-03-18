@@ -17,16 +17,16 @@ along with this program; see the file COPYING. If not, see
 #include <time.h>
 
 
-int ctime_s(char*, size_t, const time_t*);
+int asctime_s(char*, size_t, const struct tm*);
 
 
 char*
-ctime_r(const time_t* t, char* buf) {
-  if(!t || !buf) {
+asctime_r(const struct tm *tm, char *buf) {
+  if(!tm || !buf) {
     return 0;
   }
 
-  if(ctime_s(buf, 26, t)) {
+  if(asctime_s(buf, 26, tm)) {
     return 0;
   }
 

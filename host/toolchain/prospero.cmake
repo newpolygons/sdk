@@ -29,7 +29,7 @@ set(CMAKE_CROSSCOMPILING 1)
 #
 # Set sysroot and search paths
 #
-set(CMAKE_SYSROOT "${PS5_PAYLOAD_SDK}/target")
+set(CMAKE_SYSROOT "${PS5_PAYLOAD_SDK}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
@@ -39,6 +39,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 # Set prefix (on the target platform)
 #
 set(CMAKE_INSTALL_PREFIX "/user/homebrew" CACHE PATH "")
+set(CMAKE_INSTALL_LIBDIR "/user/homebrew/lib" CACHE PATH "")
 
 #
 # Encrease default verbosity in makefiles

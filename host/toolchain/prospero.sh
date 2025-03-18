@@ -21,11 +21,10 @@ PS5_PAYLOAD_SDK="${PS5_PAYLOAD_SDK}/.."
 PS5_PAYLOAD_SDK="$(realpath "${PS5_PAYLOAD_SDK}")"
 
 export PS5_PAYLOAD_SDK=${PS5_PAYLOAD_SDK}
-export PS5_SYSROOT=${PS5_PAYLOAD_SDK}/target
 export PS5_HBROOT=/user/homebrew
 
-export DESTDIR="${PS5_SYSROOT}"
-export PREFIX="${PS5_HBROOT}"
+export DESTDIR=${PS5_PAYLOAD_SDK}/target
+export PREFIX=${PS5_HBROOT}
 
 export PS5_DEPLOY=${PS5_PAYLOAD_SDK}/bin/prospero-deploy
 export PS5_CROSS_FIX_ROOT=${PS5_PAYLOAD_SDK}/bin/prospero-cross-fix-root
@@ -42,7 +41,7 @@ export RANLIB=${PS5_PAYLOAD_SDK}/bin/prospero-ranlib
 export STRIP=${PS5_PAYLOAD_SDK}/bin/prospero-strip
 export STRINGS=strings
 
-export MAKE=make
+export MAKE=gmake
 export CMAKE=${PS5_PAYLOAD_SDK}/bin/prospero-cmake
 export MESON=${PS5_PAYLOAD_SDK}/bin/prospero-meson
 export PKG_CONFIG=${PS5_PAYLOAD_SDK}/bin/prospero-pkg-config
