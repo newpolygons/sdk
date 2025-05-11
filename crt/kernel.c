@@ -30,6 +30,13 @@ along with this program; see the file COPYING. If not, see
 #define EFAULT 14
 #define ENOSYS 78
 
+#define MAP_ANONYMOUS 0x1000
+#define MAP_PRIVATE   0x02
+#define MAP_FAILED    ((void*)-1)
+
+#define PROT_READ  1
+#define PROT_WRITE 2
+
 
 /**
  * public constants.
@@ -74,6 +81,16 @@ static int rw_pair[2] = {-1, -1};
 
 #define MASTER_SOCK rw_pair[0]
 #define VICTIM_SOCK rw_pair[1]
+
+/**
+ * performance tuning: cache up to 100 return values from kernel_get_proc()
+ **/
+static int proc_cache_counter = -1;
+#define PROC_CACHE_SIZE 100
+static struct {
+  int pid;
+  unsigned long addr;
+} proc_cache[PROC_CACHE_SIZE] = {0};
 
 
 /**
@@ -504,12 +521,18 @@ kernel_get_proc(int pid) {
   unsigned long addr = 0;
   unsigned long next = 0;
 
-  if(kernel_copyout(KERNEL_ADDRESS_ALLPROC, &addr, sizeof(addr))) {
-    return 0;
-  }
-
   if(pid <= 0) {
     pid = __syscall(SYS_getpid);
+  }
+
+  for(int i=0; i<PROC_CACHE_SIZE; i++) {
+    if(proc_cache[i].pid == pid) {
+      return proc_cache[i].addr;
+    }
+  }
+
+  if(kernel_copyout(KERNEL_ADDRESS_ALLPROC, &addr, sizeof(addr))) {
+    return 0;
   }
 
   while(addr) {
@@ -528,6 +551,14 @@ kernel_get_proc(int pid) {
 
     addr = next;
   }
+
+  proc_cache_counter++;
+  if(proc_cache_counter >= PROC_CACHE_SIZE) {
+    proc_cache_counter = 0;
+  }
+
+  proc_cache[proc_cache_counter].pid = pid;
+  proc_cache[proc_cache_counter].addr = addr;
 
   return addr;
 }
@@ -746,32 +777,51 @@ kernel_dynlib_resolve(int pid, int handle, const char *nid) {
   unsigned long vaddr = 0;
   dynlib_dynsec_t dynsec;
   dynlib_obj_t obj;
-  Elf64_Sym sym;
-  char str[12];
+  Elf64_Sym* sym;
+  char* buf_start;
+  long buf_size;
+  char* strtab;
+  char* symtab;
 
   if(kernel_dynlib_obj(pid, handle, &obj)) {
     return 0;
   }
-
   if(kernel_copyout(obj.dynsec, &dynsec, sizeof(dynsec)) < 0) {
     return 0;
   }
 
-  for(unsigned long i=0; i<dynsec.symtabsize / sizeof(sym); i++) {
-    if(kernel_copyout(dynsec.symtab + sizeof(sym)*i, &sym, sizeof(sym)) < 0) {
-      return 0;
-    }
-    if(!sym.st_value) {
+  buf_size = dynsec.symtabsize + dynsec.strtabsize;
+  if((buf_start=(char*)__syscall(SYS_mmap, 0l, buf_size,
+                                 PROT_READ | PROT_WRITE,
+                                 MAP_ANONYMOUS | MAP_PRIVATE,
+                                 -1, 0l)) == MAP_FAILED) {
+    return 0;
+  }
+
+  symtab = buf_start;
+  strtab = buf_start + dynsec.symtabsize;
+
+  if(kernel_copyout(dynsec.symtab, symtab, dynsec.symtabsize) < 0) {
+    __syscall(SYS_munmap, buf_start, buf_size);
+    return 0;
+  }
+  if(kernel_copyout(dynsec.strtab, strtab, dynsec.strtabsize) < 0) {
+    __syscall(SYS_munmap, buf_start, buf_size);
+    return 0;
+  }
+
+  for(unsigned long i=0; i<dynsec.symtabsize/sizeof(Elf64_Sym); i++) {
+    sym = (Elf64_Sym*)(symtab + sizeof(Elf64_Sym)*i);
+    if(!sym->st_value) {
       continue;
     }
-    if(kernel_copyout(dynsec.strtab + sym.st_name, str, sizeof(str)) < 0) {
-      return 0;
-    }
-    if(!strncmp(nid, str, 11)) {
-      vaddr = obj.mapbase + sym.st_value;
+    if(!strncmp(nid, strtab + sym->st_name, 11)) {
+      vaddr = obj.mapbase + sym->st_value;
       break;
     }
   }
+
+  __syscall(SYS_munmap, buf_start, buf_size);
 
   return vaddr;
 }
