@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #   Copyright (C) 2024 John Törnblom
 #
 # This file is free software; you can redistribute it and/or modify it
@@ -15,21 +14,35 @@
 # along with this program; see the file COPYING. If not see
 # <http://www.gnu.org/licenses/>.
 
-SCRIPTDIR="${BASH_SOURCE[0]}"
-SCRIPTDIR="$(dirname "${SCRIPTDIR}")"
+PS5_HOST ?= ps5
+PS5_PORT ?= 9021
 
-DISTDIR="${PWD}"
-VER=$(git describe --abbrev=10 --dirty --always --tags)
+ifdef PS5_PAYLOAD_SDK
+    include $(PS5_PAYLOAD_SDK)/toolchain/prospero.mk
+else
+    $(error PS5_PAYLOAD_SDK is undefined)
+endif
 
-export TEMPDIR=$(mktemp -d)
-trap 'rm -rf -- "$TEMPDIR"' EXIT
+ELF := notify.elf
 
-export DESTDIR="${TEMPDIR}/ps5-payload-sdk-${VER}"
-export PS5_PAYLOAD_SDK=$DESTDIR
-export WIN=1 # also build windows tools
+CFLAGS := -Wall -Werror -g
 
-make clean install || exit 1
-"${SCRIPTDIR}/libcxx.sh" || exit 1
+all: $(ELF)
 
-cd "${TEMPDIR}"
-zip -r "${DISTDIR}/ps5-payload-sdk-${VER}.zip" "ps5-payload-sdk-${VER}"
+$(ELF): main.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+clean:
+	rm -f $(ELF)
+
+test: $(ELF)
+	$(PS5_DEPLOY) -h $(PS5_HOST) -p $(PS5_PORT) $^
+
+debug: $(ELF)
+	gdb-multiarch \
+	-ex "set architecture i386:x86-64" \
+	-ex "target extended-remote $(PS5_HOST):2159" \
+	-ex "file $(ELF)" \
+	-ex "remote put $(ELF) /data/$(ELF)" \
+	-ex "set remote exec-file /data/$(ELF)" \
+	-ex "start"

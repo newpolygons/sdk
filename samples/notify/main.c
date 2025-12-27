@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 John Törnblom
+/* Copyright (C) 2025 LightningMods
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -16,28 +16,72 @@ along with this program; see the file COPYING. If not, see
 
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 
-typedef struct notify_request {
-  char useless1[45];
-  char message[3075];
-} notify_request_t;
+#define SCE_NOTIFICATION_LOCAL_USER_ID_SYSTEM 0xFE
 
 
-int sceKernelSendNotificationRequest(int, notify_request_t*, size_t, int);
+int sceNotificationSend(int userId, bool isLogged, const char* payload);
+
+
+static const char toast_tmpl[] =
+  "{\n"
+  "  \"rawData\": {\n"
+  "    \"viewTemplateType\": \"InteractiveToastTemplateB\",\n"
+  "    \"channelType\": \"Downloads\",\n"
+  "    \"useCaseId\": \"IDC\",\n"
+  "    \"toastOverwriteType\": \"No\",\n"
+  "    \"isImmediate\": true,\n"
+  "    \"priority\": 100,\n"
+  "    \"viewData\": {\n"
+  "      \"icon\": {\n"
+  "        \"type\": \"Url\",\n"
+  "        \"parameters\": {\n"
+  "          \"url\": \"/path/to/icon.png\"\n"
+  "        }\n"
+  "      },\n"
+  "      \"message\": {\n"
+  "        \"body\": \"Hello World!\"\n"
+  "      },\n"
+  "      \"subMessage\": {\n"
+  "        \"body\": \"notify sample\"\n"
+  "      },\n"
+  "      \"actions\": [\n"
+  "        {\n"
+  "          \"actionName\": \"Go to debug settings\",\n"
+  "          \"actionType\": \"DeepLink\",\n"
+  "          \"defaultFocus\": true,\n"
+  "          \"parameters\": {\n"
+  "            \"actionUrl\": \"pssettings:play?function=debug_settings\"\n"
+  "          }\n"
+  "        }\n"
+  "      ]\n"
+  "    },\n"
+  "    \"platformViews\": {\n"
+  "      \"previewDisabled\": {\n"
+  "        \"viewData\": {\n"
+  "          \"icon\": {\n"
+  "            \"type\": \"Predefined\",\n"
+  "            \"parameters\": {\n"
+  "              \"icon\": \"download\"\n"
+  "            }\n"
+  "          },\n"
+  "          \"message\": {\n"
+  "            \"body\": \"notify sample is running\"\n"
+  "          }\n"
+  "        }\n"
+  "      }\n"
+  "    }\n"
+  "  },\n"
+  "  \"createdDateTime\": \"2025-12-14T03:14:51.473Z\",\n"
+  "  \"localNotificationId\": \"588193127\"\n"
+  "}";
 
 
 int
-main(int argc, char *argv[]) {
-  notify_request_t req;
-
-  bzero(&req, sizeof req);
-  if(argc == 1) {
-    snprintf(req.message, sizeof req.message, "%s", argv[0]);
-  } else if(argc >= 2) {
-    snprintf(req.message, sizeof req.message, "%s: %s", argv[0], argv[1]);
-  }
-
-  return sceKernelSendNotificationRequest(0, &req, sizeof req, 0);
+main(void) {
+  return sceNotificationSend(SCE_NOTIFICATION_LOCAL_USER_ID_SYSTEM,
+			     true, toast_tmpl);
 }
 

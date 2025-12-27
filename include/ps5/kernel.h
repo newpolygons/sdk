@@ -31,6 +31,7 @@ extern const intptr_t KERNEL_ADDRESS_SECURITY_FLAGS;
 extern const intptr_t KERNEL_ADDRESS_UTOKEN_FLAGS;
 extern const intptr_t KERNEL_ADDRESS_QA_FLAGS;
 extern const intptr_t KERNEL_ADDRESS_TARGETID;
+extern const intptr_t KERNEL_ADDRESS_BUS_DATA_DEVICES;
 
 // Proc field offsets
 extern const off_t KERNEL_OFFSET_PROC_P_UCRED;
@@ -47,7 +48,7 @@ extern const off_t KERNEL_OFFSET_UCRED_CR_SCEAUTHID;
 extern const off_t KERNEL_OFFSET_UCRED_CR_SCECAPS;
 extern const off_t KERNEL_OFFSET_UCRED_CR_SCEATTRS;
 
-//Filedesc field offsets
+// Filedesc field offsets
 extern const off_t KERNEL_OFFSET_FILEDESC_FD_RDIR;
 extern const off_t KERNEL_OFFSET_FILEDESC_FD_JDIR;
 
@@ -68,10 +69,13 @@ uint16_t kernel_getshort(intptr_t addr);
 uint8_t  kernel_getchar(intptr_t addr);
 
 intptr_t kernel_get_proc(pid_t pid);
+intptr_t kernel_get_proc_thread(pid_t pid, pid_t tid);
 intptr_t kernel_get_proc_ucred(pid_t pid);
 intptr_t kernel_get_proc_filedesc(pid_t pid);
 intptr_t kernel_get_proc_file(pid_t pid, int fd);
 
+int kernel_get_vmem_protection(pid_t pid, intptr_t addr, size_t len);
+int kernel_set_vmem_protection(pid_t pid, intptr_t addr, size_t len, int prot);
 int kernel_mprotect(pid_t pid, intptr_t addr, size_t size, int prot);
 
 int kernel_overlap_sockets(pid_t pid, int master_sock, int victim_sock);
@@ -104,11 +108,19 @@ int32_t  kernel_set_proc_rootdir(pid_t pid, intptr_t vnode);
 intptr_t kernel_get_proc_jaildir(pid_t pid);
 int32_t  kernel_set_proc_jaildir(pid_t pid, intptr_t vnode);
 
+uid_t   kernel_get_ucred_uid(pid_t pid);
 int32_t kernel_set_ucred_uid(pid_t pid, uid_t uid);
+
+uid_t   kernel_get_ucred_ruid(pid_t pid);
 int32_t kernel_set_ucred_ruid(pid_t pid, uid_t ruid);
+
+uid_t   kernel_get_ucred_svuid(pid_t pid);
 int32_t kernel_set_ucred_svuid(pid_t pid, uid_t svuid);
 
+gid_t   kernel_get_ucred_rgid(pid_t pid);
 int32_t kernel_set_ucred_rgid(pid_t pid, gid_t rgid);
+
+gid_t   kernel_get_ucred_svgid(pid_t pid);
 int32_t kernel_set_ucred_svgid(pid_t pid, gid_t svgid);
 
 __END_DECLS

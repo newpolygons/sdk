@@ -18,8 +18,8 @@ OUTPUT_FORMAT("elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
 
 PHDRS {
-	ph_text   PT_LOAD FLAGS (0x5);
-	ph_rodata PT_LOAD FLAGS (0x4);
+	ph_text   PT_LOAD FLAGS (0x7);
+	ph_rodata PT_LOAD FLAGS (0x6);
 	ph_data   PT_LOAD FLAGS (0x6);
 	ph_dyn    PT_DYNAMIC;
 }
@@ -79,11 +79,14 @@ SECTIONS {
 
 	.data : ALIGN(CONSTANT(MAXPAGESIZE)) {
 	    *(.data .data.*)
+	} : ph_data
+
+	.bss : {
 	    PROVIDE_HIDDEN (__bss_start = .);
 	    *(.bss .bss.*);
 	    *(COMMON)
 	    PROVIDE_HIDDEN (__bss_end = .);
-	} : ph_data
+	}
 
 	PROVIDE_HIDDEN (__image_end = .);
 }

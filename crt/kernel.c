@@ -41,22 +41,23 @@ along with this program; see the file COPYING. If not, see
 /**
  * public constants.
  **/
-unsigned long KERNEL_ADDRESS_TEXT_BASE      = 0;
-unsigned long KERNEL_ADDRESS_DATA_BASE      = 0;
-unsigned long KERNEL_ADDRESS_ALLPROC        = 0;
-unsigned long KERNEL_ADDRESS_PRISON0        = 0;
-unsigned long KERNEL_ADDRESS_ROOTVNODE      = 0;
-unsigned long KERNEL_ADDRESS_SECURITY_FLAGS = 0;
-unsigned long KERNEL_ADDRESS_UTOKEN_FLAGS   = 0;
-unsigned long KERNEL_ADDRESS_QA_FLAGS       = 0;
-unsigned long KERNEL_ADDRESS_TARGETID       = 0;
+unsigned long KERNEL_ADDRESS_TEXT_BASE        = 0; // optional
+unsigned long KERNEL_ADDRESS_DATA_BASE        = 0; // provided by payload args
+unsigned long KERNEL_ADDRESS_ALLPROC          = 0; // needed by crt
+unsigned long KERNEL_ADDRESS_PRISON0          = 0; // needed by crt
+unsigned long KERNEL_ADDRESS_ROOTVNODE        = 0; // needed by crt
+unsigned long KERNEL_ADDRESS_SECURITY_FLAGS   = 0; // needed by crt
+unsigned long KERNEL_ADDRESS_UTOKEN_FLAGS     = 0; // derived by crt
+unsigned long KERNEL_ADDRESS_QA_FLAGS         = 0; // derived by crt
+unsigned long KERNEL_ADDRESS_TARGETID         = 0; // derived by crt
+unsigned long KERNEL_ADDRESS_BUS_DATA_DEVICES = 0; // optional
 
 const unsigned long KERNEL_OFFSET_PROC_P_UCRED   = 0x40;
 const unsigned long KERNEL_OFFSET_PROC_P_FD      = 0x48;
 const unsigned long KERNEL_OFFSET_PROC_P_PID     = 0xBC;
 const unsigned long KERNEL_OFFSET_PROC_P_VMSPACE = 0x200;
 
-unsigned long KERNEL_OFFSET_VMSPACE_P_ROOT = 0;
+unsigned long KERNEL_OFFSET_VMSPACE_P_ROOT = 0; // needed by crt
 
 const unsigned long KERNEL_OFFSET_UCRED_CR_UID   = 0x04;
 const unsigned long KERNEL_OFFSET_UCRED_CR_RUID  = 0x08;
@@ -81,6 +82,7 @@ static int rw_pair[2] = {-1, -1};
 
 #define MASTER_SOCK rw_pair[0]
 #define VICTIM_SOCK rw_pair[1]
+
 
 /**
  * performance tuning: cache up to 100 return values from kernel_get_proc()
@@ -172,15 +174,13 @@ __kernel_init(payload_args_t* args) {
   case 0x1000000:
   case 0x1010000:
   case 0x1020000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x1B40000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x26D1BF8;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x6241074;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x624107D;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x6241098;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6241100;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1911E00;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x6565540;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c0;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x1B40000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x26D1BF8;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6241074;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1911E00;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x6565540;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1D6D478;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c0;
     break;
 
   case 0x1050000:
@@ -189,27 +189,23 @@ __kernel_init(payload_args_t* args) {
   case 0x1120000:
   case 0x1130000:
   case 0x1140000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x1B40000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x26D1C18;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x6241074;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x624107D;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x6241098;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6241100;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1911E00;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x6565540;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c0;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x1B40000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x26D1C18;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6241074;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1911E00;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x6565540;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1D6D487;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c0;
     break;
 
   case 0x2000000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x1B80000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x2701C28;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x63E1274;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x63E127D;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x63E1298;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x63E1300;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x194BA60;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x67134C0;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c8;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x1B80000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2701C28;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x63E1274;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x194BA60;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x67134C0;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1D91478;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c8;
     break;
 
   case 0x2200000:
@@ -218,97 +214,83 @@ __kernel_init(payload_args_t* args) {
   case 0x2300000:
   case 0x2500000:
   case 0x2700000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x1B80000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x2701C28;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x63E1274;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x63E127D;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x63E1298;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x63E1300;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x194BD20;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x67134C0;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c8;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x1B80000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2701C28;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x63E1274;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x194BD20;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x67134C0;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1D91478;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c8;
     break;
 
   case 0x3000000:
   case 0x3100000:
   case 0x3200000:
   case 0x3210000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x0BD0000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x276DC58;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x6466474;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x646647D;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x6466498;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6466500;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1CC2670;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x67AB4C0;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c8;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0BD0000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x276DC58;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6466474;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1CC2670;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x67AB4C0;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1DF1678;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c8;
     break;
 
   case 0x4020000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x0C00000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x27EDCB8;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x6506474;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x650647D;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x6506498;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6506500;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1D34D00;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x66E74C0;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c8;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0C00000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x27EDCB8;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6506474;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1D34D00;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x66E74C0;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1E69678;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c8;
     break;
 
   case 0x4000000:
   case 0x4030000:
   case 0x4500000:
   case 0x4510000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x0C00000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x27EDCB8;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x6506474;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x650647D;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x6506498;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6506500;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1D34D00;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x66E74C0;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c8;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0C00000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x27EDCB8;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6506474;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1D34D00;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x66E74C0;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1E69678;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c8;
     break;
 
   case 0x5000000:
   case 0x5020000:
   case 0x5100000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x0C40000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x291DD00;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x66466EC;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x66466F5;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x6646710;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6646778;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1E23470;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x6853510;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c8;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0C40000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x291DD00;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x66466EC;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E23470;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x6853510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1F996C8;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c8;
     break;
 
   case 0x5500000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x0C40000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x291DD00;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x66466EC;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x66466F5;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x6646710;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x6646778;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1E235B0;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x6853510;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1c8;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0C40000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x291DD00;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x66466EC;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E235B0;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x6853510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1F996C8;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1c8;
     break;
 
   case 0x6000000:
   case 0x6020000:
   case 0x6500000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x0C60000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x2869D20;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x65968EC;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x65968EC + 0x09;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x65968EC + 0x24;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x65968EC + 0x8C;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1E45560;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x679F510;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1d0;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0C60000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2869D20;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x65968EC;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E45560;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x679F510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1FB96C8;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1d0;
     break;
 
   case 0x7000000:
@@ -317,20 +299,72 @@ __kernel_init(payload_args_t* args) {
   case 0x7400000:
   case 0x7600000:
   case 0x7610000:
-    KERNEL_ADDRESS_TEXT_BASE      = KERNEL_ADDRESS_DATA_BASE - 0x0C50000;
-    KERNEL_ADDRESS_ALLPROC        = KERNEL_ADDRESS_DATA_BASE + 0x2859D50;
-    KERNEL_ADDRESS_SECURITY_FLAGS = KERNEL_ADDRESS_DATA_BASE + 0x0AC8064;
-    KERNEL_ADDRESS_TARGETID       = KERNEL_ADDRESS_DATA_BASE + 0x0AC8064 + 0x09;
-    KERNEL_ADDRESS_QA_FLAGS       = KERNEL_ADDRESS_DATA_BASE + 0x0AC8064 + 0x24;
-    KERNEL_ADDRESS_UTOKEN_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x0AC8064 + 0x8C;
-    KERNEL_ADDRESS_PRISON0        = KERNEL_ADDRESS_DATA_BASE + 0x1E477F0;
-    KERNEL_ADDRESS_ROOTVNODE      = KERNEL_ADDRESS_DATA_BASE + 0x30C7510;
-    KERNEL_OFFSET_VMSPACE_P_ROOT  = 0x1d0;
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0C50000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2859D50;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x0AC8064;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E477F0;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x30C7510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1FA5718;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1d0;
+    break;
+
+  case 0x8000000:
+  case 0x8200000:
+  case 0x8400000:
+  case 0x8600000:
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0C70000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2875D50;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x0AC3064;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E484D0;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x30FB510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1FA5718;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1d0;
+    break;
+
+  case 0x9000000:
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0CA0000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2755D50;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x0D72064;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E0ED80;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x2FDB510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1F65718;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1d0;
+    break;
+
+  case 0x9050000:
+  case 0x9200000:
+  case 0x9400000:
+  case 0x9600000:
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0CA0000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2755D50;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x0D73064;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E0ED80;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x2FDB510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1F65718;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1d0;
+    break;
+
+  case 0x10000000:
+  case 0x10010000:
+  case 0x10200000:
+  case 0x10400000:
+  case 0x10600000:
+    KERNEL_ADDRESS_TEXT_BASE        = KERNEL_ADDRESS_DATA_BASE - 0x0CC0000;
+    KERNEL_ADDRESS_ALLPROC          = KERNEL_ADDRESS_DATA_BASE + 0x2765D70;
+    KERNEL_ADDRESS_SECURITY_FLAGS   = KERNEL_ADDRESS_DATA_BASE + 0x0D79064;
+    KERNEL_ADDRESS_PRISON0          = KERNEL_ADDRESS_DATA_BASE + 0x1E0F4E0;
+    KERNEL_ADDRESS_ROOTVNODE        = KERNEL_ADDRESS_DATA_BASE + 0x2FA3510;
+    KERNEL_ADDRESS_BUS_DATA_DEVICES = KERNEL_ADDRESS_DATA_BASE + 0x1F65718;
+    KERNEL_OFFSET_VMSPACE_P_ROOT    = 0x1d0;
     break;
 
   default:
     return -ENOSYS;
   }
+
+  KERNEL_ADDRESS_TARGETID     = KERNEL_ADDRESS_SECURITY_FLAGS + 0x09;
+  KERNEL_ADDRESS_QA_FLAGS     = KERNEL_ADDRESS_SECURITY_FLAGS + 0x24;
+  KERNEL_ADDRESS_UTOKEN_FLAGS = KERNEL_ADDRESS_SECURITY_FLAGS + 0x8C;
 
   return 0;
 }
@@ -436,20 +470,24 @@ kernel_setlong(unsigned long addr, unsigned long val) {
   return kernel_copyin(&val, addr, sizeof(val));
 }
 
+
 int
 kernel_setint(unsigned long addr, unsigned int val) {
   return kernel_copyin(&val, addr, sizeof(val));
 }
+
 
 int
 kernel_setshort(unsigned long addr, unsigned short val) {
   return kernel_copyin(&val, addr, sizeof(val));
 }
 
+
 int
 kernel_setchar(unsigned long addr, unsigned char val) {
   return kernel_copyin(&val, addr, sizeof(val));
 }
+
 
 unsigned long
 kernel_getlong(unsigned long addr) {
@@ -460,6 +498,7 @@ kernel_getlong(unsigned long addr) {
   return val;
 }
 
+
 unsigned int
 kernel_getint(unsigned long addr) {
   unsigned int val = 0;
@@ -468,6 +507,7 @@ kernel_getint(unsigned long addr) {
 
   return val;
 }
+
 
 unsigned short
 kernel_getshort(unsigned long addr) {
@@ -478,6 +518,7 @@ kernel_getshort(unsigned long addr) {
   return val;
 }
 
+
 unsigned char
 kernel_getchar(unsigned long addr) {
   unsigned char val = 0;
@@ -486,6 +527,7 @@ kernel_getchar(unsigned long addr) {
 
   return val;
 }
+
 
 int
 kernel_get_qaflags(unsigned char qaflags[16]) {
@@ -561,6 +603,24 @@ kernel_get_proc(int pid) {
   proc_cache[proc_cache_counter].addr = addr;
 
   return addr;
+}
+
+
+unsigned long
+kernel_get_proc_thread(int pid, int tid) {
+  unsigned long proc = kernel_get_proc(pid);
+
+  if(tid < 0) {
+    __syscall(0x1b0, &tid);
+  }
+
+  for(long thr=kernel_getlong(proc+0x10); thr; thr=kernel_getlong(thr+0x10)) {
+    if((int)kernel_getlong(thr+0x9c) == (int)tid) {
+      return thr;
+    }
+  }
+
+  return 0;
 }
 
 
@@ -958,6 +1018,24 @@ kernel_set_ucred_attrs(int pid, unsigned long attrs) {
 
 
 int
+kernel_get_ucred_uid(int pid) {
+  unsigned long ucred = 0;
+  int uid = -1;
+
+  if(!(ucred=kernel_get_proc_ucred(pid))) {
+    return -1;
+  }
+
+  if(kernel_copyout(ucred + KERNEL_OFFSET_UCRED_CR_UID, &uid,
+		    sizeof(uid))) {
+    return -1;
+  }
+
+  return uid;
+}
+
+
+int
 kernel_set_ucred_uid(int pid, unsigned int uid) {
   unsigned long ucred = 0;
 
@@ -971,6 +1049,24 @@ kernel_set_ucred_uid(int pid, unsigned int uid) {
   }
 
   return 0;
+}
+
+
+int
+kernel_get_ucred_ruid(int pid) {
+  unsigned long ucred = 0;
+  int ruid = -1;
+
+  if(!(ucred=kernel_get_proc_ucred(pid))) {
+    return -1;
+  }
+
+  if(kernel_copyout(ucred + KERNEL_OFFSET_UCRED_CR_RUID, &ruid,
+		    sizeof(ruid))) {
+    return -1;
+  }
+
+  return ruid;
 }
 
 
@@ -992,6 +1088,24 @@ kernel_set_ucred_ruid(int pid, unsigned int ruid) {
 
 
 int
+kernel_get_ucred_svuid(int pid) {
+  unsigned long ucred = 0;
+  int svuid = -1;
+
+  if(!(ucred=kernel_get_proc_ucred(pid))) {
+    return -1;
+  }
+
+  if(kernel_copyout(ucred + KERNEL_OFFSET_UCRED_CR_SVUID, &svuid,
+		    sizeof(svuid))) {
+    return -1;
+  }
+
+  return svuid;
+}
+
+
+int
 kernel_set_ucred_svuid(int pid, unsigned int svuid) {
   unsigned long ucred = 0;
 
@@ -1009,6 +1123,24 @@ kernel_set_ucred_svuid(int pid, unsigned int svuid) {
 
 
 int
+kernel_get_ucred_rgid(int pid) {
+  unsigned long ucred = 0;
+  int rgid = -1;
+
+  if(!(ucred=kernel_get_proc_ucred(pid))) {
+    return -1;
+  }
+
+  if(kernel_copyout(ucred + KERNEL_OFFSET_UCRED_CR_RGID, &rgid,
+		    sizeof(rgid))) {
+    return -1;
+  }
+
+  return rgid;
+}
+
+
+int
 kernel_set_ucred_rgid(int pid, unsigned int rgid) {
   unsigned long ucred = 0;
 
@@ -1022,6 +1154,24 @@ kernel_set_ucred_rgid(int pid, unsigned int rgid) {
   }
 
   return 0;
+}
+
+
+int
+kernel_get_ucred_svgid(int pid) {
+  unsigned long ucred = 0;
+  int svgid = -1;
+
+  if(!(ucred=kernel_get_proc_ucred(pid))) {
+    return -1;
+  }
+
+  if(kernel_copyout(ucred + KERNEL_OFFSET_UCRED_CR_SVGID, &svgid,
+		    sizeof(svgid))) {
+    return -1;
+  }
+
+  return svgid;
 }
 
 
@@ -1060,73 +1210,141 @@ kernel_get_proc_filedesc(int pid) {
 }
 
 
-int
-kernel_mprotect(int pid, unsigned long addr, unsigned long len, int prot) {
+unsigned long
+kernel_get_vmem_entry(int pid, unsigned long addr) {
   unsigned long vm_map_entry_addr;
   unsigned long vmspace_addr;
   unsigned long proc_addr;
-  unsigned char vm_prot;
   unsigned long start;
   unsigned long end;
 
+  if(!KERNEL_OFFSET_PROC_P_VMSPACE) {
+    return 0;
+  }
+
   if(!(proc_addr=kernel_get_proc(pid))) {
-    return -1;
+    return 0;
   }
 
   if(kernel_copyout(proc_addr + KERNEL_OFFSET_PROC_P_VMSPACE,
                     &vmspace_addr, sizeof(vmspace_addr))) {
-    return -1;
+    return 0;
   }
 
   if(kernel_copyout(vmspace_addr + KERNEL_OFFSET_VMSPACE_P_ROOT,
 		    &vm_map_entry_addr, sizeof(vm_map_entry_addr))) {
-    return -1;
+    return 0;
   }
 
   while(vm_map_entry_addr) {
     if(kernel_copyout(vm_map_entry_addr + 0x20, &start, sizeof(start))) {
-      return -1;
+      return 0;
     }
     if(kernel_copyout(vm_map_entry_addr + 0x28, &end, sizeof(end))) {
-      return -1;
+      return 0;
     } 
 
     if(addr < start) {
       // left
       if(kernel_copyout(vm_map_entry_addr + 0x10, &vm_map_entry_addr,
                         sizeof(vm_map_entry_addr))) {
-        return -1;
+        return 0;
       }
     } else if(addr >= end) {
       // right
       if(kernel_copyout(vm_map_entry_addr + 0x18, &vm_map_entry_addr,
                         sizeof(vm_map_entry_addr))) {
-        return -1;
+        return 0;
       }
     } else {
-      // protection
-      if(kernel_copyout(vm_map_entry_addr + 0x64, &vm_prot, sizeof(vm_prot))) {
-        return -1;
-      }
-      vm_prot |= prot;
-      if(kernel_copyin(&vm_prot, vm_map_entry_addr + 0x64, sizeof(vm_prot))) {
-        return -1;
-      }
-
-      // max_protection
-      if(kernel_copyout(vm_map_entry_addr + 0x65, &vm_prot, sizeof(vm_prot))) {
-        return -1;
-      }
-      vm_prot |= prot;
-      if(kernel_copyin(&vm_prot, vm_map_entry_addr + 0x65, sizeof(vm_prot))) {
-        return -1;
-      }
-
-      return 0;
+      return vm_map_entry_addr;
     }
   }
 
-  return -1;
+  return 0;
+}
+
+
+int
+kernel_get_vmem_protection(int pid, unsigned long addr, unsigned long len) {
+  unsigned long vm_entry;
+  unsigned char vm_prot;
+  unsigned long start;
+  int first = 1;
+  int prot = -1;
+
+  if(!(vm_entry=kernel_get_vmem_entry(pid, addr))) {
+    return -1;
+  }
+
+  while(vm_entry) {
+    if(kernel_copyout(vm_entry + 0x20, &start, sizeof(start))) {
+      return -1;
+    }
+
+    if(start >= addr+len || (start < addr && !first) ) {
+      break;
+    }
+    first = 0;
+
+    if(kernel_copyout(vm_entry + 0x64, &vm_prot, sizeof(vm_prot))) {
+      return -1;
+    }
+    if(prot < 0) {
+      prot = vm_prot;
+    } else if((prot & vm_prot) != prot) {
+      return -1;
+    }
+
+    if(kernel_copyout(vm_entry + 0x08, &vm_entry, sizeof(vm_entry))) {
+      return -1;
+    }
+  }
+
+  return prot;
+}
+
+
+int
+kernel_set_vmem_protection(int pid, unsigned long addr, unsigned long len, int prot) {
+  unsigned char vm_prot = prot;
+  unsigned long vm_entry;
+  unsigned long start;
+  int first = 1;
+
+  if(prot < 0) {
+    return -1;
+  }
+  if(!(vm_entry=kernel_get_vmem_entry(pid, addr))) {
+    return -1;
+  }
+
+  while(vm_entry) {
+    if(kernel_copyout(vm_entry + 0x20, &start, sizeof(start))) {
+      return -1;
+    }
+
+    if(start >= addr+len || (start < addr && !first) ) {
+      break;
+    }
+    first = 0;
+
+    if(kernel_copyin(&vm_prot, vm_entry + 0x64, sizeof(vm_prot))) {
+      return -1;
+    }
+
+    if(kernel_copyout(vm_entry + 0x08, &vm_entry, sizeof(vm_entry))) {
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+
+int
+kernel_mprotect(int pid, unsigned long addr, unsigned long len, int prot) {
+  return kernel_set_vmem_protection(pid, addr, len, prot);
 }
 
 

@@ -36,10 +36,11 @@ clean:
 	rm -f $(ELF)
 
 test: $(ELF)
-	$(PS5_DEPLOY) -h $(PS5_HOST) -p $(PS5_PORT) $^
+	echo "$(USER)" | $(PS5_DEPLOY) -i -h $(PS5_HOST) -p $(PS5_PORT) $^
 
 debug: $(ELF)
-	gdb \
+	gdb-multiarch \
+	-ex "set architecture i386:x86-64" \
 	-ex "target extended-remote $(PS5_HOST):2159" \
 	-ex "file $(ELF)" \
 	-ex "remote put $(ELF) /data/$(ELF)" \

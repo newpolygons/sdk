@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 John Törnblom
+/* Copyright (C) 2025 John Törnblom
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -14,17 +14,26 @@ You should have received a copy of the GNU General Public License
 along with this program; see the file COPYING. If not, see
 <http://www.gnu.org/licenses/>.  */
 
-#pragma once
+#include <stdio.h>
 
 
-/**
- * Initialize the stacktrace module be assigning custom POSIX signal handlers.
- **/
-int __stacktrace_init(void);
+int sceAppInstUtilInitialize(void);
+int sceAppInstUtilAppInstallTitleDir(const char*, const char*, void*);
 
 
-/**
- * Restore POSIX signal handlers so hijacked processes keep working after the
- * payload terminates.
- **/
-int __stacktrace_fini(void);
+int
+main(int argc, char *argv[]) {
+  int err;
+
+  if((err=sceAppInstUtilInitialize())) {
+    printf("sceAppInstUtilInitialize: %x\n", err);
+    return -1;
+  }
+
+  if((err=sceAppInstUtilAppInstallTitleDir(TITLE_ID, "/user/app/", 0))) {
+    printf("sceAppInstUtilAppInstallTitleDir: %x\n", err);
+    return -1;
+  }
+
+  return 0;
+}

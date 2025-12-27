@@ -176,17 +176,6 @@ __rtld_find_file(const char *name, char* path) {
     return err;
   }
 
-  cwd[0] = 0;
-  __syscall(SYS___getcwd, cwd, sizeof(cwd));
-  if(cwd[0]) {
-    strcpy(path, cwd);
-    strcat(path, "/");
-    strcat(path, name);
-    if(!__syscall(SYS_stat, path, buf)) {
-      return 0;
-    }
-  }
-
   sprintf(path, "/system/priv/lib/%s", name);
   if(!__syscall(SYS_stat, path, buf)) {
     return 0;
@@ -224,9 +213,20 @@ __rtld_find_file(const char *name, char* path) {
 
   strcpy(path, "/user/homebrew/lib/");
   strcat(path, name);
+  if(!__syscall(SYS_stat, path, buf)) {
+    return 0;
+  }
+
+  cwd[0] = 0;
+  __syscall(SYS___getcwd, cwd, sizeof(cwd));
+  if(cwd[0]) {
+    strcpy(path, cwd);
+    strcat(path, "/");
+    strcat(path, name);
     if(!__syscall(SYS_stat, path, buf)) {
       return 0;
     }
+  }
 
   path[0] = 0;
   return -1;
